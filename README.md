@@ -18,6 +18,7 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 - Syntax highlighting
 - Configurable keybindings
 - More advanced text manipulation commands
+- Plugins that can be made using Python
 
 ## Building
 

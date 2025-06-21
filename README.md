@@ -26,4 +26,14 @@ Requires ncurses library.
 
 ```bash
 gcc -o vibs main.c buffer.c input.c render.c -lncurses
+```
+
+## Usage
+
+Run `vibs` followed by the filename you want to edit:
+
+```bash
+./vibs filename.txt
+```
+
 

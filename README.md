@@ -1,4 +1,4 @@
-# Vibs
+# vibs
 
 A minimal vi-inspired terminal text editor written in C using ncurses.
 
@@ -16,7 +16,7 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 - Search and replace functionality
 - Undo/Redo system
 - Syntax highlighting
-- Configurable keybindings
+- Super simple and easy to configure configuration file
 - More advanced text manipulation commands
 - Plugins that can be made using Python
 

@@ -9,10 +9,10 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 - Simple command mode (`:` commands like `w`, `q`, `wq`)
 - Basic line and word deletion (`dd`, `dw`)
 - Status bar showing mode, cursor position, and filename
+- Visual mode
 
 ## Planned Features (TODO)
 
-- Visual mode
 - Search and replace functionality
 - Undo/Redo system
 - Syntax highlighting

@@ -115,18 +115,37 @@ void handle_input(int ch) {
             insert_mode = 0;
         } else if (ch == KEY_BACKSPACE || ch == 127) {
             if (cx > 0) {
-                buffer[cy][--cx] = '\0';
+                // Remove character before cursor
+                memmove(&buffer[cy][cx - 1], &buffer[cy][cx], strlen(&buffer[cy][cx]) + 1);
+                cx--;
             }
         } else if (ch == '\n') {
             if (cy < LINES - 2) {
-                cy++;
-                cx = 0;
-                buffer[cy][0] = '\0';
+            // Shift lines below down by one
+            for (int i = LINES - 2; i > cy + 1; i--) {
+                strcpy(buffer[i], buffer[i - 1]);
+            }
+            // Split the current line at cx
+            int len = strlen(buffer[cy]);
+            if (len > cx) {
+                // Move the text after cursor to the new line
+                memmove(buffer[cy + 1], &buffer[cy][cx], len - cx + 1);
+                // Do not clear buffer[cy][cx], just terminate at cx
+                buffer[cy][cx] = '\0';
+            } else {
+                buffer[cy + 1][0] = '\0';
+            }
+            cy++;
+            cx = 0;
             }
         } else {
             if (cx < MAX_COLS - 1) {
-                buffer[cy][cx++] = ch;
-                buffer[cy][cx] = '\0';
+                // Insert character at cursor position
+                int len = strlen(buffer[cy]);
+                if (len < MAX_COLS - 2) {
+                    memmove(&buffer[cy][cx + 1], &buffer[cy][cx], len - cx + 1);
+                    buffer[cy][cx++] = ch;
+                }
             }
         }
     } else {
@@ -153,7 +172,7 @@ void handle_input(int ch) {
                 insert_mode = 1;
             } else if (ch == 'a') {
                 insert_mode = 1;
-                cx = strlen(buffer[cy]);
+                cx++;
             } else if (ch == 'v') {
                 visual_mode = 1;
                 visual_start_cx = cx;

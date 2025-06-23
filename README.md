@@ -14,8 +14,11 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 
 ## Planned Features (TODO)
 
-- Search and replace functionality  
-- Undo/Redo system  
+- Search and replace functionality
+- Yanking/Putting (copy paste) 
+- Undo/Redo system
+- And the other core vi features
+-------------------------
 - Syntax highlighting  
 - More advanced text manipulation commands  
 - Plugin system with Python support  

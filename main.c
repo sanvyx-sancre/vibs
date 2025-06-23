@@ -4,6 +4,7 @@
 #include "buffer.h"
 #include "render.h"
 #include "input.h"
+#include "config.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -13,6 +14,15 @@ int main(int argc, char *argv[]) {
 
     filename = argv[1];
     memset(buffer, 0, sizeof(buffer));
+    load_config("/home/sanvyx/.config/vibs/config.toml");
+    load_keys_from_config();
+
+    if (strcmp(argv[1], "-config") == 0) {
+    load_config("/home/sanvyx/.config/vibs/config.toml");
+    load_keys_from_config();
+    return 0;
+    }
+
     load_file(filename);
 
     initscr();

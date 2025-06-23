@@ -36,4 +36,10 @@ Run `vibs` followed by the filename you want to edit:
 ./vibs filename.txt
 ```
 
-To generate a configuration file, you must use the `-config` flag. By default it generates a config file in "~/.config/vibs", you can easily configure it since the configuration file is written in TOML (Tom's Obvious Minimal Language) 
+To generate a configuration file, you must use the `-config` flag like this:
+
+```bash
+./vibs -config
+```
+
+. By default it generates a config file in "~/.config/vibs", you can easily configure it since the configuration file is written in TOML (Tom's Obvious Minimal Language) 

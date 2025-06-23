@@ -27,7 +27,7 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 
 Requires ncurses library.
 
-    gcc -o vibs main.c buffer.c input.c render.c -lncurses
+    gcc -o vibs *.c -lncurses
 
 ## Usage
 

@@ -37,4 +37,4 @@ To generate a default configuration file, use the `-config` flag:
     ./vibs -config
 
 By default, this creates the config file at `~/.config/vibs/config.toml`.  
-The config file uses TOML format (Tom's Obvious Minimal Language), making it easy to tweak keybindings and settings.
+The config file uses TOML format (Tom's Obvious Minimal Language), making it really SIMPLE to configure.

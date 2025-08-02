@@ -7,6 +7,7 @@ void load_keys_from_config(void);
 extern int visual_mode;
 extern int insert_mode; 
 extern int pending_command;
+extern int screen_top;
 
 
 #endif

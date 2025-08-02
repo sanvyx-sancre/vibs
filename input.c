@@ -9,6 +9,7 @@
 int visual_mode = 0;
 int insert_mode = 0;
 int pending_command = 0;
+int screen_top = 0; // The first buffer line shown on screen
 
 static char command[64];
 
@@ -78,12 +79,21 @@ void load_keys_from_config(void) {
     key_command = get_key_or_default("command_mode", ':');
 }
 
+// Helper to keep cursor visible
+static void scroll_to_cursor(void) {
+    if (cy < screen_top) {
+        screen_top = cy;
+    } else if (cy >= screen_top + LINES - 1) {
+        screen_top = cy - (LINES - 2);
+        if (screen_top < 0) screen_top = 0;
+    }
+}
+
 void handle_input(int ch) {
     if (visual_mode) { // Visual mode handling
         if (ch == key_escape) {
             visual_mode = 0;
             visual_start_cx = visual_start_cy = -1;
-            move(cy, cx);
             draw();
             return;
         } else if ((ch == key_left || ch == KEY_LEFT) && cx > 0) {
@@ -92,7 +102,7 @@ void handle_input(int ch) {
             cx++;
         } else if ((ch == key_up || ch == KEY_UP) && cy > 0) {
             cy--;
-        } else if ((ch == key_down || ch == KEY_DOWN) && cy < LINES - 2) {
+        } else if ((ch == key_down || ch == KEY_DOWN) && cy < MAX_LINES - 2) { // <-- FIXED: removed buffer[cy+1][0] check
             cy++;
         } else if (ch == key_delete) { // Delete selection
             if (visual_start_cx == -1 || visual_start_cy == -1) {
@@ -123,10 +133,10 @@ void handle_input(int ch) {
                     buffer[i][0] = '\0';
                 }
                 strcat(buffer[start_y], buffer[end_y]);
-                for (int i = end_y + 1; i < LINES - 1; i++) {
+                for (int i = end_y + 1; i < MAX_LINES - 1; i++) {
                     strcpy(buffer[start_y + 1 + i - (end_y + 1)], buffer[i]);
                 }
-                for (int i = start_y + 1 + (LINES - 1 - (end_y + 1)); i < LINES - 1; i++) {
+                for (int i = start_y + 1 + (MAX_LINES - 1 - (end_y + 1)); i < MAX_LINES - 1; i++) {
                     buffer[i][0] = '\0';
                 }
             }
@@ -134,9 +144,11 @@ void handle_input(int ch) {
             cx = start_x;
             visual_start_cx = visual_start_cy = -1;
             visual_mode = 0;
+            scroll_to_cursor();
             draw();
             return;
         }
+        scroll_to_cursor();
         draw();
         return;
     }
@@ -150,8 +162,8 @@ void handle_input(int ch) {
                 cx--;
             }
         } else if (ch == '\n') {
-            if (cy < LINES - 2) {
-                for (int i = LINES - 2; i > cy + 1; i--) {
+            if (cy < MAX_LINES - 2) {
+                for (int i = MAX_LINES - 2; i > cy + 1; i--) {
                     strcpy(buffer[i], buffer[i - 1]);
                 }
                 int len = strlen(buffer[cy]);
@@ -170,7 +182,7 @@ void handle_input(int ch) {
             cx++;
         } else if ((ch == KEY_UP) && cy > 0) {
             cy--;
-        } else if ((ch == KEY_DOWN) && cy < LINES - 2) {
+        } else if ((ch == KEY_DOWN) && cy < MAX_LINES - 2) { // <-- FIXED: removed buffer[cy+1][0] check
             cy++;
         } else {
             if (cx < MAX_COLS - 1) {
@@ -181,13 +193,14 @@ void handle_input(int ch) {
                 }
             }
         }
+        scroll_to_cursor();
     } else {
         if (pending_command) {
             if (pending_command == key_delete) {
                 if (ch == key_delete) {
-                    if (cy < LINES - 2) {
-                        memmove(&buffer[cy], &buffer[cy + 1], (LINES - cy - 2) * MAX_COLS);
-                        buffer[LINES - 2][0] = '\0';
+                    if (cy < MAX_LINES - 2) {
+                        memmove(&buffer[cy], &buffer[cy + 1], (MAX_LINES - cy - 2) * MAX_COLS);
+                        buffer[MAX_LINES - 2][0] = '\0';
                         if (cy > 0) cy--;
                         cx = 0;
                     }
@@ -210,7 +223,6 @@ void handle_input(int ch) {
                 visual_mode = 1;
                 visual_start_cx = cx;
                 visual_start_cy = cy;
-                move(cy, cx);
             } else if (ch == key_delete) {
                 pending_command = key_delete;
             } else if ((ch == key_left || ch == KEY_LEFT) && cx > 0) {
@@ -219,7 +231,7 @@ void handle_input(int ch) {
                 cx++;
             } else if ((ch == key_up || ch == KEY_UP) && cy > 0) {
                 cy--;
-            } else if ((ch == key_down || ch == KEY_DOWN) && cy < LINES - 2) {
+            } else if ((ch == key_down || ch == KEY_DOWN) && cy < MAX_LINES - 2) { // <-- FIXED: removed buffer[cy+1][0] check
                 cy++;
             } else if (ch == key_command) {
                 int old_cx = cx, old_cy = cy;
@@ -236,7 +248,13 @@ void handle_input(int ch) {
                 while (cmd_len < (int)sizeof(command) - 1) {
                     cmd_ch = getch();
                     if (cmd_ch == key_escape) {
-                        // ...
+                        move(LINES - 1, 0);
+                        clrtoeol();
+                        refresh();
+                        noecho();
+                        cx = old_cx;
+                        cy = old_cy;
+                        scroll_to_cursor();
                         return;
                     } else if (cmd_ch == '\n') {
                         break;
@@ -250,7 +268,6 @@ void handle_input(int ch) {
                         }
                     } else if (cmd_ch >= 32 && cmd_ch <= 126) { // printable
                         command[cmd_len++] = cmd_ch;
-                        // No addch(cmd_ch) here!
                         refresh();
                     }
                 }
@@ -275,9 +292,12 @@ void handle_input(int ch) {
                 memset(command, 0, sizeof(command));
                 cx = old_cx;
                 cy = old_cy;
+                scroll_to_cursor();
             }
         }
+        scroll_to_cursor();
     }
 
     if (cx > strlen(buffer[cy])) cx = strlen(buffer[cy]);
+    draw();
 }

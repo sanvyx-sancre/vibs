@@ -12,6 +12,10 @@ int pending_command = 0;
 
 static char command[64];
 
+void init_input(void) {
+    set_escdelay(30); // 30 ms delay (default is 1000 ms)
+}
+
 // Visual selection start position
 int visual_start_cx = -1, visual_start_cy = -1;
 
@@ -73,10 +77,6 @@ void load_keys_from_config(void) {
     key_down    = get_key_or_default("move_down",    'j');
     key_command = get_key_or_default("command_mode", ':');
 }
-
-// ... rest of handle_input stays the same, using those static vars ...
-// (omitted for brevity; just make sure all comparisons use key_insert, key_append, etc.)
-
 
 void handle_input(int ch) {
     if (visual_mode) { // Visual mode handling
@@ -164,6 +164,14 @@ void handle_input(int ch) {
                 cy++;
                 cx = 0;
             }
+        } else if ((ch == KEY_LEFT) && cx > 0) {
+            cx--;
+        } else if ((ch == KEY_RIGHT) && cx < strlen(buffer[cy])) {
+            cx++;
+        } else if ((ch == KEY_UP) && cy > 0) {
+            cy--;
+        } else if ((ch == KEY_DOWN) && cy < LINES - 2) {
+            cy++;
         } else {
             if (cx < MAX_COLS - 1) {
                 int len = strlen(buffer[cy]);
@@ -221,9 +229,32 @@ void handle_input(int ch) {
                 echo();
                 printw(":");
                 refresh();
-                getnstr(command, sizeof(command) - 1);
-                noecho();
 
+                int cmd_len = 0;
+                int cmd_ch;
+                memset(command, 0, sizeof(command));
+                while (cmd_len < (int)sizeof(command) - 1) {
+                    cmd_ch = getch();
+                    if (cmd_ch == key_escape) {
+                        // ...
+                        return;
+                    } else if (cmd_ch == '\n') {
+                        break;
+                    } else if (cmd_ch == KEY_BACKSPACE || cmd_ch == 127) {
+                        if (cmd_len > 0) {
+                            cmd_len--;
+                            command[cmd_len] = '\0';
+                            move(LINES - 1, 1 + cmd_len);
+                            delch();
+                            refresh();
+                        }
+                    } else if (cmd_ch >= 32 && cmd_ch <= 126) { // printable
+                        command[cmd_len++] = cmd_ch;
+                        // No addch(cmd_ch) here!
+                        refresh();
+                    }
+                }
+                noecho();
                 if (strcmp(command, "wq") == 0) {
                     save_file();
                     endwin();
@@ -233,7 +264,7 @@ void handle_input(int ch) {
                 } else if (strcmp(command, "q") == 0) {
                     endwin();
                     exit(0);
-                } else {
+                } else if (cmd_len > 0) {
                     move(LINES - 1, 0);
                     clrtoeol();
                     printw("Unknown command: %s", command);

@@ -1,0 +1,15 @@
+# Build artifacts
+bin/
+*.o
+vibs
+
+# Editor/IDE junk
+*.swp
+*.bak
+*~
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db

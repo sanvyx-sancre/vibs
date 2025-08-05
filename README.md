@@ -26,9 +26,9 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 ## Building
 
 Requires ncurses library.
+To install:
 
-    gcc -o vibs src/*.c -Iinclude -lncurses
-
+    sudo make install
 ## Usage
 
 Run `vibs` followed by the filename you want to edit:

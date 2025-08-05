@@ -33,11 +33,11 @@ To install:
 
 Run `vibs` followed by the filename you want to edit:
 
-    ./vibs filename.txt
+    vibs filename.txt
 
 To generate a default configuration file, use the `-config` flag:
 
-    ./vibs -config
+    vibs -config
 
 By default, this creates the config file at `~/.config/vibs/config.toml`.  
 The config file uses TOML format (Tom's Obvious Minimal Language), making it really SIMPLE to configure.

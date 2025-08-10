@@ -12,7 +12,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    filename = argv[1];
     memset(buffer, 0, sizeof(buffer));
     load_config("/home/sanvyx/.config/vibs/config.toml");
     load_keys_from_config();
@@ -23,7 +22,7 @@ int main(int argc, char *argv[]) {
     return 0;
     }
 
-    load_file(filename);
+    load_file(argv[1]);
 
     initscr();
     raw();

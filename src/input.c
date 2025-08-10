@@ -281,6 +281,20 @@ void handle_input(int ch) {
                 } else if (strcmp(command, "q") == 0) {
                     endwin();
                     exit(0);
+                } else if (strncmp(command, "e ", 2) == 0) { // :e filename
+                    char *fname = command + 2;
+                    while (*fname == ' ') fname++;
+                    if (*fname) {
+                        load_file(fname);
+                        cx = cy = 0;
+                        screen_top = 0;
+                    } else {
+                        move(LINES - 1, 0);
+                        clrtoeol();
+                        printw("No filename given.");
+                        refresh();
+                        getch();
+                    }
                 } else if (cmd_len > 0) {
                     move(LINES - 1, 0);
                     clrtoeol();
@@ -288,7 +302,6 @@ void handle_input(int ch) {
                     refresh();
                     getch();
                 }
-
                 memset(command, 0, sizeof(command));
                 cx = old_cx;
                 cy = old_cy;

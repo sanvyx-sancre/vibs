@@ -7,6 +7,7 @@
 static int syntax_colors_ready = 0;
 static syntax_mode_t current_mode = SYNTAX_MODE_C;
 
+// Use the filename extension to pick a syntax mode.
 syntax_mode_t syntax_detect_mode(const char *filename) {
     if (!filename) {
         return SYNTAX_MODE_C;
@@ -24,6 +25,7 @@ syntax_mode_t syntax_detect_mode(const char *filename) {
     return SYNTAX_MODE_C;
 }
 
+// Basic Python keywords.
 static int is_python_keyword(const char *word) {
     static const char *keywords[] = {
         "and", "as", "assert", "break", "class", "continue", "def", "del",
@@ -39,6 +41,7 @@ static int is_python_keyword(const char *word) {
     return 0;
 }
 
+// Basic C keywords.
 static int is_c_keyword(const char *word) {
     static const char *keywords[] = {
         "auto", "break", "case", "char", "const", "continue", "default", "do",
@@ -55,6 +58,7 @@ static int is_c_keyword(const char *word) {
     return 0;
 }
 
+// Switch the active syntax mode.
 void syntax_set_mode(syntax_mode_t mode) {
     current_mode = mode;
 }
@@ -63,6 +67,7 @@ syntax_mode_t syntax_get_mode(void) {
     return current_mode;
 }
 
+// Set up ncurses color pairs for the syntax styles.
 void syntax_init_colors(void) {
     if (syntax_colors_ready) return;
     if (has_colors()) {
@@ -77,6 +82,7 @@ void syntax_init_colors(void) {
     syntax_colors_ready = 1;
 }
 
+// Build a simple style map for the current line.
 void syntax_build_styles(const char *line, syntax_style_t *styles, int len) {
     if (!syntax_highlighting_enabled()) {
         for (int i = 0; i < len; i++) {

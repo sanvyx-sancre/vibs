@@ -32,7 +32,10 @@ static void create_default_config(const char *path) {
     "move_right = \"l\"\n"
     "move_up = \"k\"\n"
     "move_down = \"j\"\n"
-    "command_mode = \":\"\n";
+    "command_mode = \":\"\n"
+    "\n"
+    "[ui]\n"
+    "show_line_numbers = true\n";
 
     fprintf(f, "%s", default_toml);
     fclose(f);
@@ -48,6 +51,7 @@ typedef struct {
 
 static KeyBinding keybindings[MAX_BINDINGS];
 static int keybinding_count = 0;
+static int line_numbers_enabled = 1;
 
 void load_config(const char *path) {
     FILE *fp = fopen(path, "r");
@@ -88,6 +92,14 @@ void load_config(const char *path) {
         }
     }
 
+    toml_table_t *ui = toml_table_in(conf, "ui");
+    if (ui) {
+        toml_datum_t show_numbers = toml_bool_in(ui, "show_line_numbers");
+        if (show_numbers.ok) {
+            line_numbers_enabled = show_numbers.u.b;
+        }
+    }
+
     toml_free(conf);
 }
 
@@ -103,4 +115,8 @@ char get_keybinding(const char *action) {
 int get_color(const char *element) {
     (void)element;
     return COLOR_WHITE;
+}
+
+int show_line_numbers(void) {
+    return line_numbers_enabled;
 }

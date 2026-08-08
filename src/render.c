@@ -1,6 +1,7 @@
 #include "render.h"
 #include "buffer.h"
 #include "input.h"
+#include "config.h"
 #include <ncurses.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,18 +12,20 @@ extern int status_line_visible;
 int is_in_visual_selection(int y, int x);
 
 static void draw_text_row(int row, int buf_line) {
-    int gutter_width = 5;
-    int content_col = gutter_width + 1;
+    int gutter_width = show_line_numbers() ? 5 : 0;
+    int content_col = show_line_numbers() ? gutter_width + 1 : 0;
     int visible_cols = COLS > content_col ? COLS - content_col : 1;
     int len = strlen(buffer[buf_line]);
     int draw_len = len < visible_cols ? len : visible_cols;
     int is_cursor_row = (buf_line == cy && row == cy - screen_top + 1);
 
-    char line_num[16];
-    snprintf(line_num, sizeof(line_num), "%*d ", gutter_width, buf_line + 1);
-    attron(A_DIM);
-    mvprintw(row, 0, "%s", line_num);
-    attroff(A_DIM);
+    if (show_line_numbers()) {
+        char line_num[16];
+        snprintf(line_num, sizeof(line_num), "%*d ", gutter_width, buf_line + 1);
+        attron(A_DIM);
+        mvprintw(row, 0, "%s", line_num);
+        attroff(A_DIM);
+    }
 
     if (len > 0) {
         for (int j = 0; j < draw_len; j++) {
@@ -82,11 +85,11 @@ void draw(void) {
         clrtoeol();
     }
 
-    int gutter_width = 5;
-    int content_col = gutter_width + 1;
+    int gutter_width = show_line_numbers() ? 5 : 0;
+    int content_col = show_line_numbers() ? gutter_width + 1 : 0;
     int visible_cols = COLS > content_col ? COLS - content_col : 1;
     int cursor_row = cy - screen_top + 1;
-    int cursor_col = cx < visible_cols ? content_col + cx : content_col + visible_cols - 1;
+    int cursor_col = cx < visible_cols ? (show_line_numbers() ? content_col + cx : cx) : (show_line_numbers() ? content_col + visible_cols - 1 : visible_cols - 1);
     if (cursor_row < 1) cursor_row = 1;
     if (cursor_row >= LINES - 1) cursor_row = LINES - 2;
 

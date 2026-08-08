@@ -4,5 +4,6 @@
 void load_config(const char *path);
 char get_keybinding(const char *action);  // returns char now
 int get_color(const char *element);
+int show_line_numbers(void);
 
 #endif

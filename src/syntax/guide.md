@@ -55,7 +55,7 @@ void syntax_mylang_build_styles(const char *line, syntax_style_t *styles, int le
 }
 ```
 
-Note: this parser is per-line only. Multi-line tokens require buffer/state support.
-**Note: I will not be accepting vibe coded PRs.**
+  Note: this parser is per-line only. Multi-line tokens require buffer/state support.
+  **Note: I will not be accepting vibe coded PRs.**
 
 Open a PR and I'll review.

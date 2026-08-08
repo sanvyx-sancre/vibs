@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -std=c99
 LDFLAGS = -lncurses
 
-SRC = $(wildcard src/*.c)
+SRC = $(wildcard src/*.c) $(wildcard src/syntax/*.c)
 BIN_DIR = bin
 TARGET = $(BIN_DIR)/vibs
 INSTALL_DIR = /usr/local/bin

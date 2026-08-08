@@ -35,7 +35,13 @@ static void create_default_config(const char *path) {
     "command_mode = \":\"\n"
     "\n"
     "[ui]\n"
-    "show_line_numbers = true\n";
+    "show_line_numbers = true\n"
+    "syntax_highlighting = true\n"
+    "keyword_color = \"cyan\"\n"
+    "string_color = \"green\"\n"
+    "comment_color = \"magenta\"\n"
+    "number_color = \"yellow\"\n"
+    "preprocessor_color = \"blue\"\n";
 
     fprintf(f, "%s", default_toml);
     fclose(f);
@@ -52,6 +58,12 @@ typedef struct {
 static KeyBinding keybindings[MAX_BINDINGS];
 static int keybinding_count = 0;
 static int line_numbers_enabled = 1;
+static int syntax_enabled = 1;
+static int syntax_keyword_color = COLOR_CYAN;
+static int syntax_string_color = COLOR_GREEN;
+static int syntax_comment_color = COLOR_MAGENTA;
+static int syntax_number_color = COLOR_YELLOW;
+static int syntax_preprocessor_color = COLOR_BLUE;
 
 void load_config(const char *path) {
     FILE *fp = fopen(path, "r");
@@ -98,6 +110,66 @@ void load_config(const char *path) {
         if (show_numbers.ok) {
             line_numbers_enabled = show_numbers.u.b;
         }
+
+        toml_datum_t syntax_enabled_flag = toml_bool_in(ui, "syntax_highlighting");
+        if (syntax_enabled_flag.ok) {
+            syntax_enabled = syntax_enabled_flag.u.b;
+        }
+
+        toml_datum_t keyword_color = toml_string_in(ui, "keyword_color");
+        if (keyword_color.ok) {
+            if (strcmp(keyword_color.u.s, "cyan") == 0) syntax_keyword_color = COLOR_CYAN;
+            else if (strcmp(keyword_color.u.s, "green") == 0) syntax_keyword_color = COLOR_GREEN;
+            else if (strcmp(keyword_color.u.s, "magenta") == 0) syntax_keyword_color = COLOR_MAGENTA;
+            else if (strcmp(keyword_color.u.s, "yellow") == 0) syntax_keyword_color = COLOR_YELLOW;
+            else if (strcmp(keyword_color.u.s, "blue") == 0) syntax_keyword_color = COLOR_BLUE;
+            else if (strcmp(keyword_color.u.s, "red") == 0) syntax_keyword_color = COLOR_RED;
+            free(keyword_color.u.s);
+        }
+
+        toml_datum_t string_color = toml_string_in(ui, "string_color");
+        if (string_color.ok) {
+            if (strcmp(string_color.u.s, "cyan") == 0) syntax_string_color = COLOR_CYAN;
+            else if (strcmp(string_color.u.s, "green") == 0) syntax_string_color = COLOR_GREEN;
+            else if (strcmp(string_color.u.s, "magenta") == 0) syntax_string_color = COLOR_MAGENTA;
+            else if (strcmp(string_color.u.s, "yellow") == 0) syntax_string_color = COLOR_YELLOW;
+            else if (strcmp(string_color.u.s, "blue") == 0) syntax_string_color = COLOR_BLUE;
+            else if (strcmp(string_color.u.s, "red") == 0) syntax_string_color = COLOR_RED;
+            free(string_color.u.s);
+        }
+
+        toml_datum_t comment_color = toml_string_in(ui, "comment_color");
+        if (comment_color.ok) {
+            if (strcmp(comment_color.u.s, "cyan") == 0) syntax_comment_color = COLOR_CYAN;
+            else if (strcmp(comment_color.u.s, "green") == 0) syntax_comment_color = COLOR_GREEN;
+            else if (strcmp(comment_color.u.s, "magenta") == 0) syntax_comment_color = COLOR_MAGENTA;
+            else if (strcmp(comment_color.u.s, "yellow") == 0) syntax_comment_color = COLOR_YELLOW;
+            else if (strcmp(comment_color.u.s, "blue") == 0) syntax_comment_color = COLOR_BLUE;
+            else if (strcmp(comment_color.u.s, "red") == 0) syntax_comment_color = COLOR_RED;
+            free(comment_color.u.s);
+        }
+
+        toml_datum_t number_color = toml_string_in(ui, "number_color");
+        if (number_color.ok) {
+            if (strcmp(number_color.u.s, "cyan") == 0) syntax_number_color = COLOR_CYAN;
+            else if (strcmp(number_color.u.s, "green") == 0) syntax_number_color = COLOR_GREEN;
+            else if (strcmp(number_color.u.s, "magenta") == 0) syntax_number_color = COLOR_MAGENTA;
+            else if (strcmp(number_color.u.s, "yellow") == 0) syntax_number_color = COLOR_YELLOW;
+            else if (strcmp(number_color.u.s, "blue") == 0) syntax_number_color = COLOR_BLUE;
+            else if (strcmp(number_color.u.s, "red") == 0) syntax_number_color = COLOR_RED;
+            free(number_color.u.s);
+        }
+
+        toml_datum_t preprocessor_color = toml_string_in(ui, "preprocessor_color");
+        if (preprocessor_color.ok) {
+            if (strcmp(preprocessor_color.u.s, "cyan") == 0) syntax_preprocessor_color = COLOR_CYAN;
+            else if (strcmp(preprocessor_color.u.s, "green") == 0) syntax_preprocessor_color = COLOR_GREEN;
+            else if (strcmp(preprocessor_color.u.s, "magenta") == 0) syntax_preprocessor_color = COLOR_MAGENTA;
+            else if (strcmp(preprocessor_color.u.s, "yellow") == 0) syntax_preprocessor_color = COLOR_YELLOW;
+            else if (strcmp(preprocessor_color.u.s, "blue") == 0) syntax_preprocessor_color = COLOR_BLUE;
+            else if (strcmp(preprocessor_color.u.s, "red") == 0) syntax_preprocessor_color = COLOR_RED;
+            free(preprocessor_color.u.s);
+        }
     }
 
     toml_free(conf);
@@ -119,4 +191,17 @@ int get_color(const char *element) {
 
 int show_line_numbers(void) {
     return line_numbers_enabled;
+}
+
+int syntax_highlighting_enabled(void) {
+    return syntax_enabled;
+}
+
+int syntax_color_for(const char *style_name) {
+    if (strcmp(style_name, "keyword") == 0) return syntax_keyword_color;
+    if (strcmp(style_name, "string") == 0) return syntax_string_color;
+    if (strcmp(style_name, "comment") == 0) return syntax_comment_color;
+    if (strcmp(style_name, "number") == 0) return syntax_number_color;
+    if (strcmp(style_name, "preprocessor") == 0) return syntax_preprocessor_color;
+    return COLOR_WHITE;
 }

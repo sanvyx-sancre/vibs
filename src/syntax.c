@@ -7,6 +7,23 @@
 static int syntax_colors_ready = 0;
 static syntax_mode_t current_mode = SYNTAX_MODE_C;
 
+syntax_mode_t syntax_detect_mode(const char *filename) {
+    if (!filename) {
+        return SYNTAX_MODE_C;
+    }
+
+    const char *dot = strrchr(filename, '.');
+    if (!dot) {
+        return SYNTAX_MODE_C;
+    }
+
+    if (strcmp(dot, ".py") == 0) {
+        return SYNTAX_MODE_PYTHON;
+    }
+
+    return SYNTAX_MODE_C;
+}
+
 static int is_python_keyword(const char *word) {
     static const char *keywords[] = {
         "and", "as", "assert", "break", "class", "continue", "def", "del",

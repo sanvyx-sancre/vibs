@@ -31,6 +31,7 @@ static void draw_text_row(int row, int buf_line) {
     }
 
     syntax_style_t styles[1024];
+    syntax_set_mode(syntax_detect_mode(filename));
     syntax_build_styles(buffer[buf_line], styles, len);
 
     if (len > 0) {

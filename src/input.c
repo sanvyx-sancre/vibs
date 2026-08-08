@@ -12,6 +12,7 @@ int pending_command = 0;
 int screen_top = 0; // The first buffer line shown on screen
 
 static char command[64];
+int status_line_visible = 1;
 
 void init_input(void) {
     set_escdelay(30); // 30 ms delay (default is 1000 ms)
@@ -55,6 +56,7 @@ static char key_up = 'k';
 static char key_down = 'j';
 static char key_command = ':';
 static char key_escape = 27; // ESC
+static char key_toggle_status = 't';
 
 // Declare here so main.c can call it:
 void load_keys_from_config(void);
@@ -98,7 +100,7 @@ void handle_input(int ch) {
             return;
         } else if ((ch == key_left || ch == KEY_LEFT) && cx > 0) {
             cx--;
-        } else if ((ch == key_right || ch == KEY_RIGHT) && cx < strlen(buffer[cy])) {
+        } else if ((ch == key_right || ch == KEY_RIGHT) && cx < (int)strlen(buffer[cy])) {
             cx++;
         } else if ((ch == key_up || ch == KEY_UP) && cy > 0) {
             cy--;
@@ -178,7 +180,7 @@ void handle_input(int ch) {
             }
         } else if ((ch == KEY_LEFT) && cx > 0) {
             cx--;
-        } else if ((ch == KEY_RIGHT) && cx < strlen(buffer[cy])) {
+        } else if ((ch == KEY_RIGHT) && cx < (int)strlen(buffer[cy])) {
             cx++;
         } else if ((ch == KEY_UP) && cy > 0) {
             cy--;
@@ -227,12 +229,14 @@ void handle_input(int ch) {
                 pending_command = key_delete;
             } else if ((ch == key_left || ch == KEY_LEFT) && cx > 0) {
                 cx--;
-            } else if ((ch == key_right || ch == KEY_RIGHT) && cx < strlen(buffer[cy])) {
+            } else if ((ch == key_right || ch == KEY_RIGHT) && cx < (int)strlen(buffer[cy])) {
                 cx++;
             } else if ((ch == key_up || ch == KEY_UP) && cy > 0) {
                 cy--;
             } else if ((ch == key_down || ch == KEY_DOWN) && cy < MAX_LINES - 2) { // <-- FIXED: removed buffer[cy+1][0] check
                 cy++;
+            } else if (ch == key_toggle_status) {
+                status_line_visible = !status_line_visible;
             } else if (ch == key_command) {
                 int old_cx = cx, old_cy = cy;
 
@@ -311,6 +315,6 @@ void handle_input(int ch) {
         scroll_to_cursor();
     }
 
-    if (cx > strlen(buffer[cy])) cx = strlen(buffer[cy]);
+    if (cx > (int)strlen(buffer[cy])) cx = (int)strlen(buffer[cy]);
     draw();
 }

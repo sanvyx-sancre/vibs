@@ -49,9 +49,6 @@ typedef struct {
 static KeyBinding keybindings[MAX_BINDINGS];
 static int keybinding_count = 0;
 
-// Dummy color store, replace with real logic
-static int colors[8];
-
 void load_config(const char *path) {
     FILE *fp = fopen(path, "r");
     if (!fp) {
@@ -104,6 +101,6 @@ char get_keybinding(const char *action) {
 }
 
 int get_color(const char *element) {
-    // Placeholder until TOML color loading is added
+    (void)element;
     return COLOR_WHITE;
 }

@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     raw();
     keypad(stdscr, TRUE);
     noecho();
+    init_input();
     curs_set(1);
 
     draw();

@@ -3,6 +3,7 @@
 
 void handle_input(int ch);
 void load_keys_from_config(void);
+void init_input(void);
 
 extern int visual_mode;
 extern int insert_mode; 

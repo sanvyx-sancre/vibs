@@ -20,7 +20,7 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 - More advanced text manipulation commands  
 - And the other core vi features
 -------------------------
-- Syntax highlighting  
+- Syntax highlighting  **(Partially Done)**
 - Plugin system with Python support  
 
 ## Building

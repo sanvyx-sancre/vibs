@@ -23,6 +23,8 @@ Guidelines
 - Keywords: use a static keyword table and strcmp on the identifier slice.
 - Heuristics: `ident(` → function name (STYLE_KEYWORD). Preprocessor tokens → STYLE_PREPROCESSOR.
 
+  Note: Improvements to the syntax system itself are welcome. If your language requires functionality not currently supported (e.g. multiline state), feel free to implement it and submit a PR.
+
 Wiring
 
 - If `src/syntax.c` already dispatches to your language builder, add the file and function and it will be used.
@@ -53,6 +55,7 @@ void syntax_mylang_build_styles(const char *line, syntax_style_t *styles, int le
 }
 ```
 
-Note: this parser is per-line only. Multi-line tokens require buffer/state support.
+  Note: this parser is per-line only. Multi-line tokens require buffer/state support.
+  **Note: I will not be accepting vibe coded PRs.**
 
 Open a PR and I'll review.

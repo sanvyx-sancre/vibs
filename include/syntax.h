@@ -13,6 +13,7 @@ typedef enum {
 typedef enum {
     SYNTAX_MODE_PLAIN,
     SYNTAX_MODE_C,
+    SYNTAX_MODE_CPP,
     SYNTAX_MODE_PYTHON
 } syntax_mode_t;
 

@@ -7,6 +7,31 @@ char buffer[MAX_LINES][MAX_COLS];
 char *filename = NULL;
 int cx = 0, cy = 0;
 
+typedef struct {
+    char lines[MAX_LINES][MAX_COLS];
+    int cx;
+    int cy;
+} buffer_snapshot_t;
+
+#define MAX_HISTORY 200
+static buffer_snapshot_t undo_stack[MAX_HISTORY];
+static buffer_snapshot_t redo_stack[MAX_HISTORY];
+static int undo_count = 0;
+static int redo_count = 0;
+static int history_open = 0;
+
+static void snapshot_current(buffer_snapshot_t *snap) {
+    memcpy(snap->lines, buffer, sizeof(buffer));
+    snap->cx = cx;
+    snap->cy = cy;
+}
+
+static void restore_snapshot(const buffer_snapshot_t *snap) {
+    memcpy(buffer, snap->lines, sizeof(buffer));
+    cx = snap->cx;
+    cy = snap->cy;
+}
+
 static char *my_strdup(const char *s) {
     size_t len = strlen(s) + 1;
     char *p = malloc(len);
@@ -88,4 +113,57 @@ void save_file(void) {
             fprintf(f, "%s\n", buffer[i]);
     }
     fclose(f);
+}
+
+void buffer_history_push(void) {
+    if (undo_count >= MAX_HISTORY) {
+        for (int i = 1; i < MAX_HISTORY; i++) {
+            undo_stack[i - 1] = undo_stack[i];
+        }
+        undo_count = MAX_HISTORY - 1;
+    }
+    snapshot_current(&undo_stack[undo_count]);
+    undo_count++;
+    redo_count = 0;
+}
+
+void buffer_history_begin(void) {
+    if (!history_open) {
+        buffer_history_push();
+        history_open = 1;
+    }
+}
+
+void buffer_history_end(void) {
+    history_open = 0;
+}
+
+void buffer_history_undo(void) {
+    if (undo_count <= 0) return;
+    undo_count--;
+    if (redo_count >= MAX_HISTORY) {
+        for (int i = 1; i < MAX_HISTORY; i++) {
+            redo_stack[i - 1] = redo_stack[i];
+        }
+        redo_count = MAX_HISTORY - 1;
+    }
+    buffer_snapshot_t current;
+    snapshot_current(&current);
+    redo_stack[redo_count++] = current;
+    restore_snapshot(&undo_stack[undo_count]);
+}
+
+void buffer_history_redo(void) {
+    if (redo_count <= 0) return;
+    redo_count--;
+    if (undo_count >= MAX_HISTORY) {
+        for (int i = 1; i < MAX_HISTORY; i++) {
+            undo_stack[i - 1] = undo_stack[i];
+        }
+        undo_count = MAX_HISTORY - 1;
+    }
+    buffer_snapshot_t current;
+    snapshot_current(&current);
+    undo_stack[undo_count++] = current;
+    restore_snapshot(&redo_stack[redo_count]);
 }

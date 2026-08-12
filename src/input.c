@@ -57,6 +57,8 @@ static char key_down = 'j';
 static char key_command = ':';
 static char key_escape = 27; // ESC
 static char key_toggle_status = 't';
+static char key_undo = 'u';
+static char key_redo = 'r';
 
 // Declare here so main.c can call it:
 void load_keys_from_config(void);
@@ -79,6 +81,8 @@ void load_keys_from_config(void) {
     key_up      = get_key_or_default("move_up",      'k');
     key_down    = get_key_or_default("move_down",    'j');
     key_command = get_key_or_default("command_mode", ':');
+    key_undo    = get_key_or_default("undo",         'u');
+    key_redo    = get_key_or_default("redo",         'r');
 }
 
 // Helper to keep cursor visible
@@ -94,6 +98,7 @@ static void scroll_to_cursor(void) {
 void handle_input(int ch) {
     if (visual_mode) { // Visual mode handling
         if (ch == key_escape) {
+            buffer_history_end();
             visual_mode = 0;
             visual_start_cx = visual_start_cy = -1;
             draw();
@@ -107,6 +112,7 @@ void handle_input(int ch) {
         } else if ((ch == key_down || ch == KEY_DOWN) && cy < MAX_LINES - 2) { // <-- FIXED: removed buffer[cy+1][0] check
             cy++;
         } else if (ch == key_delete) { // Delete selection
+            buffer_history_begin();
             if (visual_start_cx == -1 || visual_start_cy == -1) {
                 visual_start_cx = cx;
                 visual_start_cy = cy;
@@ -146,6 +152,7 @@ void handle_input(int ch) {
             cx = start_x;
             visual_start_cx = visual_start_cy = -1;
             visual_mode = 0;
+            buffer_history_end();
             scroll_to_cursor();
             draw();
             return;
@@ -157,14 +164,17 @@ void handle_input(int ch) {
 
     if (insert_mode) {
         if (ch == key_escape) {
+            buffer_history_end();
             insert_mode = 0;
         } else if (ch == KEY_BACKSPACE || ch == 127) {
             if (cx > 0) {
+                buffer_history_begin();
                 memmove(&buffer[cy][cx - 1], &buffer[cy][cx], strlen(&buffer[cy][cx]) + 1);
                 cx--;
             }
         } else if (ch == '\n') {
             if (cy < MAX_LINES - 2) {
+                buffer_history_begin();
                 for (int i = MAX_LINES - 2; i > cy + 1; i--) {
                     strcpy(buffer[i], buffer[i - 1]);
                 }
@@ -188,6 +198,7 @@ void handle_input(int ch) {
             cy++;
         } else {
             if (cx < MAX_COLS - 1) {
+                buffer_history_begin();
                 int len = strlen(buffer[cy]);
                 if (len < MAX_COLS - 2) {
                     memmove(&buffer[cy][cx + 1], &buffer[cy][cx], len - cx + 1);
@@ -201,24 +212,29 @@ void handle_input(int ch) {
             if (pending_command == key_delete) {
                 if (ch == key_delete) {
                     if (cy < MAX_LINES - 2) {
+                        buffer_history_begin();
                         memmove(&buffer[cy], &buffer[cy + 1], (MAX_LINES - cy - 2) * MAX_COLS);
                         buffer[MAX_LINES - 2][0] = '\0';
                         if (cy > 0) cy--;
                         cx = 0;
                     }
                 } else if (ch == 'w') {
+                    buffer_history_begin();
                     int len = strlen(buffer[cy]);
                     while (cx < len && buffer[cy][cx] != ' ' && buffer[cy][cx] != '\0') {
                         memmove(&buffer[cy][cx], &buffer[cy][cx + 1], strlen(&buffer[cy][cx + 1]) + 1);
                         len--;
                     }
                 }
+                buffer_history_end();
             }
             pending_command = 0;
         } else {
             if (ch == key_insert) {
+                buffer_history_end();
                 insert_mode = 1;
             } else if (ch == key_append) {
+                buffer_history_end();
                 insert_mode = 1;
                 cx++;
             } else if (ch == key_visual) {
@@ -226,6 +242,7 @@ void handle_input(int ch) {
                 visual_start_cx = cx;
                 visual_start_cy = cy;
             } else if (ch == key_delete) {
+                buffer_history_end();
                 pending_command = key_delete;
             } else if ((ch == key_left || ch == KEY_LEFT) && cx > 0) {
                 cx--;
@@ -237,6 +254,12 @@ void handle_input(int ch) {
                 cy++;
             } else if (ch == key_toggle_status) {
                 status_line_visible = !status_line_visible;
+            } else if (ch == key_undo) {
+                buffer_history_end();
+                buffer_history_undo();
+            } else if (ch == key_redo) {
+                buffer_history_end();
+                buffer_history_redo();
             } else if (ch == key_command) {
                 int old_cx = cx, old_cy = cy;
 

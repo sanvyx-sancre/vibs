@@ -33,6 +33,8 @@ static void create_default_config(const char *path) {
     "move_up = \"k\"\n"
     "move_down = \"j\"\n"
     "command_mode = \":\"\n"
+    "undo = \"u\"\n"
+    "redo = \"r\"\n"
     "\n"
     "[ui]\n"
     "show_line_numbers = true\n"

@@ -11,12 +11,12 @@ A minimal vi-inspired terminal text editor written in C using ncurses.
 - Status bar showing mode, cursor position, and filename  
 - Visual mode (done)  
 - Super simple and easy-to-configure configuration file (done)  
+- Undo/Redo system (done) 
 
 ## Planned Features (TODO)
 
 - Search and replace functionality
 - Yanking/Putting (copy paste) 
-- Undo/Redo system
 - More advanced text manipulation commands  
 - And the other core vi features
 -------------------------

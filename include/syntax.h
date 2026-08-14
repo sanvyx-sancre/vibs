@@ -14,7 +14,8 @@ typedef enum {
     SYNTAX_MODE_PLAIN,
     SYNTAX_MODE_C,
     SYNTAX_MODE_CPP,
-    SYNTAX_MODE_PYTHON
+    SYNTAX_MODE_PYTHON,
+    SYNTAX_MODE_LUA
 } syntax_mode_t;
 
 void syntax_init_colors(void);

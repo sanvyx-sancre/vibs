@@ -12,6 +12,7 @@ syntax_mode_t syntax_detect_mode(const char *filename) {
     if (!dot) return SYNTAX_MODE_C;
     if (strcmp(dot, ".py") == 0) return SYNTAX_MODE_PYTHON;
     if (strcmp(dot, ".lua") == 0) return SYNTAX_MODE_LUA;
+    if (strcmp(dot, ".rs") == 0) return SYNTAX_MODE_RUST;
     if (strcmp(dot, ".cc") == 0 || strcmp(dot, ".cpp") == 0 || strcmp(dot, ".cxx") == 0 || strcmp(dot, ".c++") == 0 ||
         strcmp(dot, ".hh") == 0 || strcmp(dot, ".hpp") == 0 || strcmp(dot, ".hxx") == 0 || strcmp(dot, ".ipp") == 0 ||
         strcmp(dot, ".C") == 0 || strcmp(dot, ".H") == 0) {
@@ -25,6 +26,7 @@ void syntax_c_build_styles(const char *line, syntax_style_t *styles, int len);
 void syntax_cpp_build_styles(const char *line, syntax_style_t *styles, int len);
 void syntax_python_build_styles(const char *line, syntax_style_t *styles, int len);
 void syntax_lua_build_styles(const char *line, syntax_style_t *styles, int len);
+void syntax_rust_build_styles(const char *line, syntax_style_t *styles, int len);
 
 // Switch the active syntax mode.
 void syntax_set_mode(syntax_mode_t mode) {
@@ -64,6 +66,8 @@ void syntax_build_styles(const char *line, syntax_style_t *styles, int len) {
         syntax_python_build_styles(line, styles, len);
     } else if (current_mode == SYNTAX_MODE_LUA) {
         syntax_lua_build_styles(line, styles, len);
+    } else if (current_mode == SYNTAX_MODE_RUST) {
+        syntax_rust_build_styles(line, styles, len);
     } else if (current_mode == SYNTAX_MODE_CPP) {
         syntax_cpp_build_styles(line, styles, len);
     } else {

@@ -5,6 +5,7 @@
 #include "render.h"
 #include "input.h"
 #include "config.h"
+#include "plugin.h"
 
 int main(int argc, char *argv[]) {
     const char* home = getenv("HOME");
@@ -33,7 +34,15 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    char plugin_dir[512];
+    snprintf(plugin_dir, sizeof(plugin_dir), "%s/.config/vibs/plugins", home);
+    if (!vibs_python_load(plugin_dir)) {
+        fprintf(stderr, "Warning: could not initialize Python plugins.\n");
+    }
+
     load_file(argv[1]);
+    vibs_emit_event(VIBS_EVENT_FILE_OPEN);
+    vibs_emit_event(VIBS_EVENT_STARTUP);
 
     initscr();
     raw();
@@ -52,5 +61,6 @@ int main(int argc, char *argv[]) {
     }
 
     endwin();
+    vibs_shutdown_plugins();
     return 0;
 }

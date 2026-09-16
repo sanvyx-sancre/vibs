@@ -41,3 +41,36 @@ To generate a default configuration file, use the `-config` flag:
 
 By default, this creates the config file at `~/.config/vibs/config.toml`.  
 The config file uses TOML format (Tom's Obvious Minimal Language), making it really SIMPLE to configure.
+
+## Plugin system
+
+vibs is being built around a small plugin API so simple plugins can be easy to write while advanced plugins can access editor operations through stable functions. The first layer supports registered commands and lifecycle events without exposing internal editor globals.
+
+The planned Python interface will wrap this same API and support plugins such as formatters, linters, project tools, custom commands, and syntax providers. The current C-side boundary includes:
+
+- custom colon commands with arguments
+- startup, file-open, before-save, after-save, text-changed, cursor-move, and shutdown events
+- reading and replacing buffer lines
+- reading and changing the cursor
+- reading the current filename
+
+The Python runtime and user plugin discovery will be added on top of this boundary.
+
+### Python plugins
+
+Python development headers and the Python embed configuration are required to build the plugin runtime. The Makefile checks for `python3-embed` through `pkg-config` or `python3-config`.
+
+Plugins are loaded from:
+
+    ~/.config/vibs/plugins/*.py
+
+To try the included example:
+
+    mkdir -p ~/.config/vibs/plugins
+    cp examples/hello_plugin.py ~/.config/vibs/plugins/
+    make
+    vibs example.txt
+
+Inside vibs, run `:Hello world`. The command should display `Hello, world!`.
+
+If a plugin does not appear to load, run `:PluginStatus`. It reports whether Python initialized, whether the plugin directory was found, and how many plugin files loaded successfully.

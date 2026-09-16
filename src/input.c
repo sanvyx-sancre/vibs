@@ -2,6 +2,7 @@
 #include "buffer.h"
 #include "render.h"
 #include "config.h"
+#include "plugin.h"
 #include <string.h>
 #include <ncurses.h>
 #include <stdlib.h>  // for exit()
@@ -300,11 +301,15 @@ void handle_input(int ch) {
                 }
                 noecho();
                 if (strcmp(command, "wq") == 0) {
+                    vibs_emit_event(VIBS_EVENT_BEFORE_SAVE);
                     save_file();
+                    vibs_emit_event(VIBS_EVENT_AFTER_SAVE);
                     endwin();
                     exit(0);
                 } else if (strcmp(command, "w") == 0) {
+                    vibs_emit_event(VIBS_EVENT_BEFORE_SAVE);
                     save_file();
+                    vibs_emit_event(VIBS_EVENT_AFTER_SAVE);
                 } else if (strcmp(command, "q") == 0) {
                     endwin();
                     exit(0);
@@ -315,6 +320,7 @@ void handle_input(int ch) {
                         load_file(fname);
                         cx = cy = 0;
                         screen_top = 0;
+                        vibs_emit_event(VIBS_EVENT_FILE_OPEN);
                     } else {
                         move(LINES - 1, 0);
                         clrtoeol();
@@ -323,11 +329,22 @@ void handle_input(int ch) {
                         getch();
                     }
                 } else if (cmd_len > 0) {
+                    char plugin_message[256];
+                    if (vibs_execute_command(command, plugin_message, sizeof(plugin_message))) {
+                        if (plugin_message[0]) {
+                            move(LINES - 1, 0);
+                            clrtoeol();
+                            printw("%s", plugin_message);
+                            refresh();
+                            getch();
+                        }
+                    } else {
                     move(LINES - 1, 0);
                     clrtoeol();
                     printw("Unknown command: %s", command);
                     refresh();
                     getch();
+                    }
                 }
                 memset(command, 0, sizeof(command));
                 cx = old_cx;
